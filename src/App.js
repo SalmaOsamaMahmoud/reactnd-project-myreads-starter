@@ -1,66 +1,46 @@
-import React from 'react'
+import React, { useState, useEffect } from 'react'
 import './App.css'
 import BookList from './BookList'
 import { Route } from 'react-router-dom'
 import BookSearch from './BookSearch'
 import * as BooksAPI from './BooksAPI'
-class BooksApp extends React.Component {
-  state = {
-    shelfBooks: []
-  }
 
-  componentDidMount() {
-    BooksAPI.getAll().then((books) => {
-      this.setState({
-        shelfBooks: books
-      })
-    });
-  }
-
-  bookshelves = [
+const App = () => {
+  const shelves = [
     { value: 'currentlyReading', name: 'Currently Reading' },
     { value: 'wantToRead', name: 'Want to Read' },
     { value: 'read', name: 'Read' },
     { value: 'none', name: 'None' },
   ]
+  const [shelfBooks, setShelfBooks] = useState([])
 
-  updateShelfBooks = (book, shelf) => {
-    BooksAPI.update(book, shelf).then((bookshelvesBooks) => {
-      this.setState((prevState) => {
-        const books = [...prevState.shelfBooks]
-        const index = books.findIndex(x => x.id === book.id)
-        if (index !== -1) {
-          const updatedBook = books[index]
-          books.splice(index, 1)
-          if (shelf !== 'none') {
-            updatedBook.shelf = shelf
-            books.push(updatedBook)
-          }
-        } else {
-          book.shelf = shelf
-          books.push(book)
-        }
-        return {
-          shelfBooks: books
-        }
-      });
-    });
+  useEffect(() => {
+    BooksAPI.getAll().then((books) => setShelfBooks(books));
+  }, [])
+
+  const updateShelfBooks = (book, shelf) => {
+    BooksAPI.update(book, shelf).then((shelvesBooks) => {
+      if (shelf !== 'none') {
+        book.shelf = shelf
+        setShelfBooks(shelfBooks.filter(b => b.id !== book.id).concat([book]))
+      } else {
+        setShelfBooks(shelfBooks.filter(b => b.id !== book.id))
+      }
+    })
   }
 
-  render() {
-    return (
-      <div className="app">
-        <Route exact path="/" render={
-          () =>
-            (<BookList shelfBooks={this.state.shelfBooks} bookshelves={this.bookshelves} updateShelfBooks={this.updateShelfBooks.bind(this)}></BookList>)
-        }></Route>
-        {<Route path="/search" render={
-          () =>
-            (<BookSearch shelfBooks={this.state.shelfBooks} bookshelves={this.bookshelves} updateShelfBooks={this.updateShelfBooks.bind(this)}></BookSearch>)
-        }></Route>}
-      </div>
-    )
-  }
+  return (
+    <div className="app">
+      <Route exact path="/" render={
+        () =>
+          (<BookList shelfBooks={shelfBooks} shelves={shelves} updateShelfBooks={updateShelfBooks}></BookList>)
+      }></Route>
+      {<Route path="/search" render={
+        () =>
+          (<BookSearch shelfBooks={shelfBooks} shelves={shelves} updateShelfBooks={updateShelfBooks}></BookSearch>)
+      }></Route>}
+    </div>
+  )
 }
 
-export default BooksApp
+export default App

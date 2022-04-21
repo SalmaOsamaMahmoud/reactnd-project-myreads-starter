@@ -1,50 +1,48 @@
-import React, { Component } from 'react'
+import React, { useState, useEffect } from 'react'
 import PropTypes from 'prop-types'
 
-class Book extends Component {
-  constructor(props) {
-    super(props);
-    this.state =
-    {
-      bookshelf: this.findShelf(this.props.book.id)
-    }
-  }
+const Book = props => {
+  const { shelves, book, shelfBooks, updateShelfBooks } = props;
+  const [shelf, setShelf] = useState('')
 
-  findShelf = (bookId) => {
-    const book = this.props.shelfBooks.find(x => x.id === bookId);
-    if (book) {
-      return book.shelf
+  useEffect(() => {
+    setShelf(findShelf(book.id))
+  })
+
+  const findShelf = (bookId) => {
+    const bookItem = shelfBooks.find(x => x.id === bookId);
+    if (bookItem) {
+      return bookItem.shelf
     }
     return 'none'
   }
 
-  handleChange = (e) => {
-    this.setState({ bookshelf: e.target.value });
-    this.props.updateShelfBooks(this.props.book, e.target.value)
+  const handleChange = (e) => {
+    setShelf(e.target.value)
+    updateShelfBooks(book, e.target.value)
   }
 
-  render() {
-    return (
-      <div className="book">
-        <div className="book-top">
-          <div className="book-cover" style={{ width: 128, height: 193, backgroundImage: 'url(' + (this.props.book.imageLinks && this.props.book.imageLinks.thumbnail) + ')' }}></div>
-          <div className="book-shelf-changer">
-            <select value={this.state.bookshelf} onChange={this.handleChange}>
-              <option value="move" disabled>Move to...</option>
-              {this.props.bookshelves.map((bookshelf, index) => (<option key={index} value={bookshelf.value}>{bookshelf.name}</option>))}
-            </select>
-          </div>
+  return (
+    <div className="book">
+      <div className="book-top">
+        <div className="book-cover" style={{ width: 128, height: 193, backgroundImage: 'url(' + (book.imageLinks && book.imageLinks.thumbnail) + ')' }}></div>
+        <div className="book-shelf-changer">
+          <select value={shelf} onChange={handleChange}>
+            <option value="move" disabled>Move to...</option>
+            {shelves.map((shelfItem, index) => (<option key={index} value={shelfItem.value}>{shelfItem.name}</option>))}
+          </select>
         </div>
-        <div className="book-title">{this.props.book.title}</div>
-        {this.props.book.authors && this.props.book.authors.map((author, index) => (<div key={index} className="book-authors">{author}</div>))}
       </div>
-    )
-  }
+      <div className="book-title">{book.title}</div>
+      {book.authors && book.authors.map((author, index) => (<div key={index} className="book-authors">{author}</div>))}
+    </div>
+  )
 }
 
 Book.propTypes = {
+  book: PropTypes.object.isRequired,
   shelfBooks: PropTypes.array.isRequired,
-  bookshelves: PropTypes.array.isRequired,
+  shelves: PropTypes.array.isRequired,
   updateShelfBooks: PropTypes.func.isRequired
 }
 

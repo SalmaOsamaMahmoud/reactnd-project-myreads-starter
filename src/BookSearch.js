@@ -1,64 +1,65 @@
-import React, { Component } from 'react'
+import React, { useState, useEffect } from 'react'
 import PropTypes from 'prop-types'
 import { Link } from 'react-router-dom'
 import * as BooksAPI from './BooksAPI'
 import Book from './Book'
 
-class BookSearch extends Component {
-  state = {
-    search: '',
-    filteredBooks: []
+const BookSearch = (props) => {
+  const [search, setSearch] = useState('')
+  const [filteredBooks, setfilteredBooks] = useState([])
+  const { shelfBooks, shelves, updateShelfBooks } = props;
+  let abortController = new AbortController();
+
+  const handleChange = (event) => {
+    setSearch(event.target.value)
   }
 
-  abortController = null;
+  useEffect(() => {
+    abortController = new AbortController()
+    searchBooks()
+    return () => abortController.abort()
+  }, [search]);
 
-  handleChange = async (event) => {
-    this.setState({ search: event.target.value })
-    if (this.abortController) {
-      this.abortController.abort()
-    }
-    if (event.target.value !== '') {
-      this.abortController = new AbortController()
-      const booksRes = await BooksAPI.search(event.target.value, this.abortController.signal)
+  const searchBooks = async () => {
+    if (search !== '') {
+      const booksRes = await BooksAPI.search(search, abortController.signal)
       if (!booksRes.error) {
-        this.setState({ filteredBooks: booksRes })
+        setfilteredBooks(booksRes)
       } else {
-        this.setState({ filteredBooks: [] })
+        setfilteredBooks([])
       }
     }
     else {
-      this.setState({ filteredBooks: [] })
+      setfilteredBooks([])
     }
   }
 
-  render() {
-    return (
-      <div className="search-books">
-        <div className="search-books-bar">
-          <Link to="/"><button className="close-search">Close</button></Link>
-          <div className="search-books-input-wrapper">
-            <input type="text" placeholder="Search by title or author" value={this.state.search} onChange={this.handleChange} />
-          </div>
-        </div>
-        <div className="search-books-results">
-          <ol className="books-grid">
-            {
-              this.state.filteredBooks.map((book) => (
-                <li key={book.id}>
-                  <Book book={book} bookshelves={this.props.bookshelves} shelfBooks={this.props.shelfBooks} updateShelfBooks={this.props.updateShelfBooks}></Book>
-                </li>
-              ))
-            }
-          </ol>
+  return (
+    <div className="search-books">
+      <div className="search-books-bar">
+        <Link to="/"><button className="close-search">Close</button></Link>
+        <div className="search-books-input-wrapper">
+          <input type="text" placeholder="Search by title or author" value={search} onChange={handleChange} />
         </div>
       </div>
-    )
-  }
+      <div className="search-books-results">
+        <ol className="books-grid">
+          {
+            filteredBooks.map((book) => (
+              <li key={book.id}>
+                <Book book={book} shelves={shelves} shelfBooks={shelfBooks} updateShelfBooks={updateShelfBooks}></Book>
+              </li>
+            ))
+          }
+        </ol>
+      </div>
+    </div>
+  )
 }
 
 BookSearch.propTypes = {
   shelfBooks: PropTypes.array.isRequired,
-  bookshelves: PropTypes.array.isRequired,
+  shelves: PropTypes.array.isRequired,
   updateShelfBooks: PropTypes.func.isRequired
 }
 

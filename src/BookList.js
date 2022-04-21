@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom'
 import Bookshelf from './Bookshelf'
 
 const BookList = props => {
+  const { shelfBooks, shelves, updateShelfBooks } = props;
   return (
     <div className="list-books">
       <div className="list-books-title">
@@ -12,9 +13,9 @@ const BookList = props => {
       <div className="list-books-content">
         <div>
           {
-            props.bookshelves.filter(x => x.value !== 'none').map((bookshelf, index) => (
-              <Bookshelf key={index} shelfBooks={props.shelfBooks} bookshelf={bookshelf}
-                bookshelves={props.bookshelves} updateShelfBooks={props.updateShelfBooks}></Bookshelf>
+            shelves.filter(x => x.value !== 'none').map((bookshelf, index) => (
+              <Bookshelf key={index} shelfBooks={shelfBooks} bookshelf={bookshelf}
+                shelves={shelves} updateShelfBooks={updateShelfBooks}></Bookshelf>
             ))}
         </div>
       </div>
@@ -27,7 +28,7 @@ const BookList = props => {
 
 BookList.propTypes = {
   shelfBooks: PropTypes.array.isRequired,
-  bookshelves: PropTypes.array.isRequired,
+  shelves: PropTypes.array.isRequired,
   updateShelfBooks: PropTypes.func.isRequired
 }
 

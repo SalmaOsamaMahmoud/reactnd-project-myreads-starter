@@ -1,17 +1,18 @@
-import PropTypes from 'prop-types'
 import React from 'react'
+import PropTypes from 'prop-types'
 import Book from './Book'
 
-const Bookshelf = (props) => {
+const Bookshelf = props => {
+    const { shelfBooks, bookshelf, shelves, updateShelfBooks } = props;
     return (
         <div className="bookshelf">
-            <h2 className="bookshelf-title">{props.bookshelf.name}</h2>
+            <h2 className="bookshelf-title">{bookshelf.name}</h2>
             <div className="bookshelf-books">
                 <ol className="books-grid">
                     {
-                        props.shelfBooks.filter(x => x.shelf === props.bookshelf.value).map((book) => (
+                        shelfBooks.filter(x => x.shelf === bookshelf.value).map((book) => (
                             <li key={book.id}>
-                                <Book book={book} shelfBooks={props.shelfBooks} bookshelves={props.bookshelves} updateShelfBooks={props.updateShelfBooks}></Book>
+                                <Book book={book} shelfBooks={shelfBooks} shelves={shelves} updateShelfBooks={updateShelfBooks}></Book>
                             </li>
                         ))
                     }
@@ -24,7 +25,7 @@ const Bookshelf = (props) => {
 Bookshelf.propTypes = {
     shelfBooks: PropTypes.array.isRequired,
     bookshelf: PropTypes.object.isRequired,
-    bookshelves: PropTypes.array.isRequired,
+    shelves: PropTypes.array.isRequired,
     updateShelfBooks: PropTypes.func.isRequired
 }
 
